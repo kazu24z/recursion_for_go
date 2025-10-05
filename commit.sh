@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# カレントディレクトリ名を取得
+folder_name=$(basename "$(pwd)")
+
+# 確認メッセージを表示
+echo "コミットメッセージ: \"$folder_name\""
+read -p "このメッセージでコミットしますか? (y/n): " answer
+
+# 回答を確認
+if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+    git commit -m "$folder_name"
+else
+    echo "コミットをキャンセルしました"
+fi
