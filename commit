@@ -9,6 +9,7 @@ read -p "このメッセージでコミットしますか? (y/n): " answer
 
 # 回答を確認
 if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+    git add .
     git commit -m "$folder_name"
 else
     echo "コミットをキャンセルしました"
