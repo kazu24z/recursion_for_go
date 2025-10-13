@@ -5,52 +5,44 @@ type SinglyLinkedListNode struct {
 	next *SinglyLinkedListNode
 }
 
+// スロー/ファストポインタパターン
 func palindromeLinkedList(head *SinglyLinkedListNode) bool {
-	// ノードの数
-	current := head
-	counter := int32(0)
-	for current != nil {
-		current = current.next
-		counter++
-	}
-
-	isEven := (counter%2 == 0) // 偶数ならtrue
-	var skipNum int32
-
-	if isEven {
-		skipNum = 1
-	} else {
-		skipNum = 2
-	}
-
-	temp := head
-	// 空のスタック配列
-	stack := []int32{}
-
-	// 先頭からcounterの半分までをスタックに入れる
-	for i := int32(1); i <= counter/2; i++ {
-		stack = append(stack, temp.data)
-		temp = temp.next
-	}
-
-	if !isEven {
-		// 奇数の場合、頂点の値をスキップ
-		temp = temp.next
-	}
-
-	// 後半分に対して、スタックの先頭と比較し、値が一致し続けるかをチェック
-	for i := counter/2 + skipNum; i <= counter; i++ {
-		if stack[len(stack)-1] == temp.data {
-			// スタックから値をpopしていく
-			stack = stack[:len(stack)-1]
-		}
-		temp = temp.next
-	}
-	// スタックが空なら回文
-	if len(stack) == 0 {
+	// 要素が1つの場合は回文扱い
+	if head.next == nil {
 		return true
 	}
 
-	// それ以外の場合はfalseを返す
-	return false
+	// headを指す2つのポインタ
+	slow := head
+	fast := head
+
+	stack := []int32{}
+
+	// fastが最後に行くまで進める
+	for fast != nil && fast.next != nil {
+		// スタックにslow.dataを格納
+		stack = append(stack, slow.data)
+
+		slow = slow.next
+		fast = fast.next.next
+	}
+
+	// fastがnil、つまり奇数の場合
+	// 奇数の場合、末尾までfastが行くと、最後のfast = fast.nextでnilが入る
+	if fast != nil {
+		slow = slow.next
+	}
+
+	// slowには残り半分のnodeがリストになっている
+	for slow != nil {
+		// slow.dataと、stackの先頭（=配列の末尾）が一致していなかったらその時点でfalse
+		if slow.data != stack[len(stack)-1] {
+			return false
+		}
+		// stackの末尾をpop
+		stack = stack[:len(stack)-1]
+		slow = slow.next
+	}
+
+	return true
 }
