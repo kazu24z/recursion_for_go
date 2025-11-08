@@ -33,42 +33,32 @@ func NewBinarySearchTree(arr []int32) *BinarySearchTree {
 
 // ソート処理 せっかくなのでマージソート実装
 func mergeSortArr(arr []int32) []int32 {
-	return mergeSortArrHelper(arr, int32(0), int32(len(arr)-1))
-}
-
-func mergeSortArrHelper(arr []int32, start int32, end int32) []int32 {
-	// ベースケース
-	if start == end {
+	if len(arr) <= 1 {
 		return arr
 	}
 
-	// 分割統治法
-	// 配列を2分割していく
-	mid := int32((start + end) / 2)
-	left := mergeSortArrHelper(arr[start:mid+1], 0, mid-start) // ベースケースを終えた後は[2]とかになっている = 要素数1のスライス
-	right := mergeSortArrHelper(arr[mid+1:end+1], 0, end-mid-1)
-	// memo: left, rightは再帰で、ここでは、とにかく分割していくことに徹する。
-	// 最後まで分割した後で、結合処理をする。分けて考えること
+	mid := len(arr) / 2
+	left := mergeSortArr(arr[:mid])  // 0からmidの1つ前までの配列を渡してる
+	right := mergeSortArr(arr[mid:]) // midから末尾までを渡してる
 
-	combined := make([]int32, 0)
-	// left, rightが出揃った時点で両スライスで比較し、勝ち抜けで結果スライスに入れていく
-	leftCounter := 0
-	rightCounter := 0
-	for len(left) > leftCounter && len(right) > rightCounter {
-		if left[leftCounter] <= right[rightCounter] {
-			combined = append(combined, left[leftCounter])
-			leftCounter++
+	// マージ処理
+	result := make([]int32, 0, len(arr))
+	i, j := 0, 0 //カウンター
+
+	for i < len(left) && j < len(right) {
+		if left[i] <= right[j] {
+			result = append(result, left[i])
+			i++
 		} else {
-			combined = append(combined, right[rightCounter])
-			rightCounter++
+			result = append(result, right[j])
+			j++
 		}
 	}
 
-	// 最後余ったほうを結果スライスのケツにappendしてreturn
-	combined = append(combined, left[leftCounter:]...)
-	combined = append(combined, right[rightCounter:]...)
+	result = append(result, left[i:]...)  // iは探索の途中状態を持ってるのでそこから
+	result = append(result, right[j:]...) // jも
 
-	return combined
+	return result
 }
 
 func sortedArrayToBST(arr []int32) *BinaryTree {
