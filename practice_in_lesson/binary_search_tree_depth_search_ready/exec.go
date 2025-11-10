@@ -12,7 +12,14 @@ func main() {
 	fmt.Println("key97は存在してる？:", bst.KeyExist(97))
 	fmt.Println("keyが97:", bst.Search(97).data)
 
+	fmt.Print("間順走査 結果： ")
 	bst.root.PrintInOrder()
+	fmt.Print("逆換順走査 結果: ")
+	bst.root.PrintReverseOrder()
+	fmt.Print("前順走査 結果: ")
+	bst.root.PrintPreOrder()
+	fmt.Print("後順走査 結果: ")
+	bst.root.PrintPostOrder()
 }
 
 // BinaryTree = 単なる木構造
@@ -29,11 +36,58 @@ func (b *BinaryTree) PrintInOrder() {
 	fmt.Println()
 }
 
+func (b *BinaryTree) PrintReverseOrder() {
+	b.reverseOrder(b)
+	fmt.Println()
+}
+
+func (b *BinaryTree) PrintPreOrder() {
+	b.preOrderWalk(b)
+	fmt.Println()
+}
+
+func (b *BinaryTree) PrintPostOrder() {
+	b.postOrderWalk(b)
+	fmt.Println()
+}
+
+// 間順走査
 func (b *BinaryTree) inOrderWalk(root *BinaryTree) {
 	if root != nil {
 		b.inOrderWalk(root.left)
 		fmt.Print(root.data, " ")
 		b.inOrderWalk(root.right)
+	}
+}
+
+// 逆間順走査
+// 右→自分→左の再帰処理で降順に取り出す
+func (b *BinaryTree) reverseOrder(root *BinaryTree) {
+	if root != nil {
+		b.reverseOrder(root.right)
+		fmt.Print(root.data, " ")
+		b.reverseOrder(root.left)
+	}
+}
+
+// 前順走査
+// 自分→左→右の再帰処理で取り出す（木構造の状態を保持して取り出せる）
+func (b *BinaryTree) preOrderWalk(root *BinaryTree) {
+	if root != nil {
+		fmt.Print(root.data, " ")
+		b.preOrderWalk(root.left)
+		b.preOrderWalk(root.right)
+	}
+}
+
+// 後順走査
+// 左→右→自分の再帰処理
+func (b *BinaryTree) postOrderWalk(root *BinaryTree) {
+	if root != nil {
+		b.postOrderWalk(root.left)
+		b.postOrderWalk(root.right)
+		fmt.Print(root.data, " ")
+
 	}
 }
 
