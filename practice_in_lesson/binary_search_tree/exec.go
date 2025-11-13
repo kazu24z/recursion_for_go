@@ -6,9 +6,13 @@ func main() {
 	arr := []int32{3, 6, 1, 4, 9, 2, 8, 7, 5}
 
 	bst := NewBinarySearchTree(arr)
+	bst.Insert(11)
 	fmt.Println(bst.root.data)
-	fmt.Println(bst.root.left.data)
 	fmt.Println(bst.root.right.data)
+	fmt.Println(bst.root.right.right.data)
+	fmt.Println(bst.root.right.right.right.data)
+	fmt.Println(bst.root.right.right.right.right.data)
+
 }
 
 type BinaryTree struct {
@@ -118,4 +122,32 @@ func (b *BinarySearchTree) Exist(key int32) bool {
 	}
 
 	return false
+}
+
+func (b *BinarySearchTree) Insert(v int32) {
+	newNode := &BinaryTree{data: v}
+	if b.root == nil {
+		b.root = &BinaryTree{data: v}
+		return
+	}
+
+	iterator := b.root
+
+	for iterator != nil {
+		if iterator.data > v {
+			// もしiterator.leftがnilになるなら、そのleftにnewNode入れてbreak
+			if iterator.left == nil {
+				iterator.left = newNode
+				break
+			}
+
+			iterator = iterator.left
+		} else {
+			if iterator.right == nil {
+				iterator.right = newNode
+				break
+			}
+			iterator = iterator.right
+		}
+	}
 }
