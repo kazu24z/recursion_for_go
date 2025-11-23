@@ -11,26 +11,35 @@ type BinaryTree struct {
 }
 
 func validateBST(root *BinaryTree) bool {
-	inOrderWalkedArr := make([]int32, 0)
-	validateBSTHelper(root, &inOrderWalkedArr)
-
-	for i := 0; i < len(inOrderWalkedArr)-1; i++ {
-		if inOrderWalkedArr[i] >= inOrderWalkedArr[i+1] {
-			return false
-		}
-	}
-	return true
-
+	return ValidateBSTHelper(root, nil, nil)
 }
 
-func validateBSTHelper(root *BinaryTree, arr *[]int32) {
+// func validateBSTHelper(root *BinaryTree, arr *[]int32) {
+// 	if root == nil {
+// 		return
+// 	}
+
+// 	validateBSTHelper(root.left, arr)
+// 	*arr = append(*arr, root.data.value)
+// 	validateBSTHelper(root.right, arr)
+// }
+
+func ValidateBSTHelper(root, min, max *BinaryTree) bool {
 	if root == nil {
-		return
+		return true
 	}
 
-	validateBSTHelper(root.left, arr)
-	*arr = append(*arr, root.data.value)
-	validateBSTHelper(root.right, arr)
+	// 左の場合
+	if min != nil && root.data.value <= min.data.value {
+		return false
+	}
+	// 右の場合
+	if max != nil && root.data.value >= max.data.value {
+		return false
+	}
+
+	return ValidateBSTHelper(root.left, min, root) &&
+		ValidateBSTHelper(root.right, root, max)
 }
 
 /**
