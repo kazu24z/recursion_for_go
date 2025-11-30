@@ -5,103 +5,109 @@ import (
 )
 
 func main() {
-	arr := []int32{2, 42, 11, 30, 10, 7, 6, 5, 9}
-	heap := Heap{}
 
-	fmt.Println("=== ヒープソート開始 ===")
-	fmt.Println("初期配列:", arr)
-	heap.HeapSort(arr)
-	fmt.Println("=== ヒープソート完了 ===")
-	fmt.Println("最終結果:", arr)
+	pq := NewPriorityQueue([]int32{2, 3, 43, 2, 53, 6, 75, 10})
+	pq.Insert(100) // 戻り値を期待しない
+	fmt.Println(pq.data)
+
 }
 
-func (h *Heap) HeapSort(arr []int32) {
-	fmt.Println("\n--- 最大ヒープ構築開始 ---")
-	// 最大ヒープ化する
-	h.BuildMaxHeap(arr)
-	fmt.Println("最大ヒープ構築完了:", arr)
+type PriorityQueue struct {
+	data []int32
+}
 
-	// 配列の範囲を定義
-	arrRange := len(arr) - 1
+func NewPriorityQueue(arr []int32) *PriorityQueue {
+	// 元配列をコピー
+	target := make([]int32, len(arr))
+	copy(target, arr)
 
-	fmt.Println("\n--- ソート処理開始 ---")
-	// 配列範囲が0より大きい限り処理を繰り返す
-	for arrRange > 0 {
-		fmt.Printf("\n[ステップ %d] 範囲: 0〜%d\n", len(arr)-arrRange, arrRange)
-		fmt.Printf("  交換前: %v (最大値 %d を末尾へ)\n", arr, arr[0])
+	// 最大ヒープを生成する処理
+	pq := &PriorityQueue{}
+	pq.buildMaxHeap(target)
+	pq.data = target
+	return pq
 
-		// 配列先頭と末尾を入れ替える
-		temp := arr[0]
-		arr[0] = arr[arrRange] // 先頭に末尾の値を入れる
-		arr[arrRange] = temp   // 末尾に先頭の値を入れる
+}
 
-		fmt.Printf("  交換後: %v\n", arr)
-		fmt.Printf("  確定済み: %v\n", arr[arrRange:])
+func (pq *PriorityQueue) Pop() int32 {
+	if len(pq.data) <= 0 {
+		panic("priority queue is empty")
+	}
+	// ルートが最大値なので、それを一時変数に入れる
+	poped := pq.data[0]
+	// 配列の末尾を先頭に入れる
+	pq.data[0] = pq.data[len(pq.data)-1]
 
-		// 入れ替えたら最大ヒープが崩れるから最大ヒープ化
-		// 配列範囲を1つ狭める
-		fmt.Printf("  ヒープ修復対象範囲: 0〜%d\n", arrRange-1)
-		h.MaxHeapify(arr, 0, int32(arrRange))
-		fmt.Printf("  ヒープ修復後: %v\n", arr[:arrRange])
-		arrRange--
+	// 配列の末尾から値を削除
+	pq.data = pq.data[:len(pq.data)-1]
 
+	// 先頭から再度ヒープ化処理を実行する
+	pq.maxHeapify(pq.data, 0)
+	return poped
+}
+
+// 優先度付きキューの挿入
+func (pq *PriorityQueue) Insert(x int32) {
+	// 配列の末尾に追加
+	pq.data = append(pq.data, x)
+
+	// 追加した要素のindex
+	i := int32(len(pq.data) - 1) // これが奇数なら、親からみて左側、偶数なら親から右側の子になる
+	// 親のindex
+	parent := pq.parent(i)
+	// 追加したノードの親と勝負
+	for parent >= 0 && x > pq.data[parent] {
+		// 子と親を入れ替え
+		pq.data[i], pq.data[parent] = pq.data[parent], pq.data[i]
+		// 追加要素と親が入れ替わったので、xの位置を示すiを親のindex番号にする
+		i = parent
+		parent = pq.parent(i)
 	}
 }
 
-func (h *Heap) BuildMaxHeap(arr []int32) {
+func (pq *PriorityQueue) buildMaxHeap(arr []int32) {
+	// 入力配列の真ん中
 	mid := int32((len(arr) - 1) / 2)
-	fmt.Printf("最後の非葉ノード: インデックス %d\n", mid)
 
 	for i := mid; i >= 0; i-- {
-		fmt.Printf("  インデックス %d からMaxHeapify実行\n", i)
-		h.MaxHeapify(arr, i, int32(len(arr)))
-		fmt.Printf("    結果: %v\n", arr)
+		pq.maxHeapify(arr, i)
 	}
-
 }
 
-type Heap struct{}
-
-func (h *Heap) MaxHeapify(arr []int32, i int32, heapRange int32) {
-	left := h.left(i)
-	right := h.right(i)
-
+func (pq *PriorityQueue) maxHeapify(arr []int32, i int32) {
+	left := pq.left(i)
+	right := pq.right(i)
+	heapSize := int32(len(arr))
 	largest := i
 
-	fmt.Printf("    MaxHeapify(i=%d): 親=%d", i, arr[i])
-
-	if left < heapRange {
-		fmt.Printf(", 左子=%d", arr[left])
-		if arr[largest] < arr[left] {
-			largest = left
-		}
-	} else {
-		fmt.Printf(", 左子=なし")
+	// 左右と比較して左右が大きいならindexを入れ替える
+	if left < heapSize && arr[left] > arr[largest] {
+		largest = left
 	}
 
-	if right < heapRange {
-		fmt.Printf(", 右子=%d", arr[right])
-		if arr[largest] < arr[right] {
-			largest = right
-		}
-	} else {
-		fmt.Printf(", 右子=なし")
+	if right < heapSize && arr[right] > arr[largest] {
+		largest = right
 	}
 
 	if largest != i {
-		fmt.Printf(" → 交換: %d ↔ %d\n", arr[i], arr[largest])
+		// 値を入れ替える
 		arr[i], arr[largest] = arr[largest], arr[i]
-		h.MaxHeapify(arr, largest, heapRange)
-	} else {
-		fmt.Printf(" → 交換なし\n")
+		pq.maxHeapify(arr, largest)
 	}
-
 }
 
-func (h *Heap) left(i int32) int32 {
+func (pq *PriorityQueue) left(i int32) int32 {
 	return 2*i + 1
 }
 
-func (h *Heap) right(i int32) int32 {
+func (pq *PriorityQueue) right(i int32) int32 {
 	return 2*i + 2
+}
+
+func (pq *PriorityQueue) parent(index int32) int32 {
+	if index%2 == 0 {
+		return int32(index-2) / 2
+	} else {
+		return int32(index-1) / 2
+	}
 }
