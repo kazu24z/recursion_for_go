@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 )
 
 func main() {
@@ -45,11 +46,13 @@ func isMultipleOf3Or5(x int) bool {
 
 // これ、xの平方根までのチェックいい
 func isPrime(x int) bool {
-	if x < 2 {
+	if x == 2 {
+		return true
+	}
+	if x%2 == 0 {
 		return false
 	}
-
-	for i := 2; i < x; i++ {
+	for i := 3; i <= int(math.Sqrt(float64(x))); i += 2 {
 		if x%i == 0 {
 			return false
 		}
